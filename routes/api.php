@@ -19,4 +19,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/convert', [ConvertVideoController::class, 'store']);
+Route::post('/convert', [ConvertVideoController::class, 'convertVideo']);
+Route::post('/convert-multi-video', [ConvertVideoController::class, 'convertMultiVideo']);
