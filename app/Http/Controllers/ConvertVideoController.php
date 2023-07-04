@@ -35,6 +35,12 @@ class ConvertVideoController extends Controller
                     if (File::exists($input_path)) {
                         $Command = $Ffmpeg . ' -i ' . $input_path . ' -ss ' . $item['start'] . ' -t ' . $item['duration'] . ' -vf "scale=1920:1080" -r 25 -c:v libx264 -preset fast -c:a aac -y ' . $output_path;
                         shell_exec($Command);
+                        $Commands_1 = shell_exec($this->exe . '\ffprobe.exe -i ' . $output_path . ' -show_streams -select_streams a -loglevel error');
+                        if (empty($Commands_1)) {
+                            dd(1);
+                        } else {
+                            dd(2);
+                        }
                         fwrite($cut_input_file, "file '$output_path'" . PHP_EOL);
                     }
                 }
