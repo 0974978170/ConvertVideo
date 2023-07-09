@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/convert-multi-video', [ConvertVideoController::class, 'convertMultiVideo']);
+Route::post('/zoom-video', [ConvertVideoController::class, 'zoomVideo']);

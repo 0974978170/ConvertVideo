@@ -35,12 +35,6 @@ class ConvertVideoController extends Controller
                     if (File::exists($input_path)) {
                         $Command = $Ffmpeg . ' -i ' . $input_path . ' -ss ' . $item['start'] . ' -t ' . $item['duration'] . ' -vf "scale=1920:1080" -r 25 -c:v libx264 -preset fast -c:a aac -y ' . $output_path;
                         shell_exec($Command);
-                        $Commands_1 = shell_exec($this->exe . '\ffprobe.exe -i ' . $output_path . ' -show_streams -select_streams a -loglevel error');
-                        if (empty($Commands_1)) {
-                            dd(1);
-                        } else {
-                            dd(2);
-                        }
                         fwrite($cut_input_file, "file '$output_path'" . PHP_EOL);
                     }
                 }
@@ -53,6 +47,41 @@ class ConvertVideoController extends Controller
                 shell_exec($Commands);
                 unlink($cut_input_txt);
                 $response['Convert'] = 'Convert Success';
+            } else {
+                $response['error'] = 'ERROR';
+                $status = 500;
+            }
+        } catch (\Exception $e) {
+            $response['error'] = 'ERROR';
+            $status = 500;
+        } finally {
+            return response()->json(
+                [$response], $status);
+        }
+    }
+
+    public function zoomVideo(Request $request) {
+        set_time_limit(0);
+        $Ffmpeg = $this->exe . '\ffmpeg.exe';
+        $Data = $request->input();
+        $status = 200;
+        try {
+            if ($Data) {
+                $folder_output = 'output-video-zoom';
+                if (!file_exists(base_path('storage\app\public\\' . $folder_output))) {
+                    mkdir(base_path('storage\app\public\\' . $folder_output), 0777, true);
+                }
+                foreach ($Data as $item) {
+                    $input_path = base_path('storage\app\public\input' . '\\' . $item['videoId']);
+                    $array = explode('.',$item['videoId']);
+                    $output_path = base_path('storage\app\public\\' . $folder_output . '\\' . $array[0] . '_' . $item['x-zoom'] . '_' . $item['y-zoom'] . '.mp4');
+                    if (File::exists($input_path)) {
+                        $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $item['end-zoom'] . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
+                        . "," . $item['scale-zoom'] . "))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
+                        shell_exec($Command);
+                    }
+                }
+                $response['Zoom'] = 'Zoom Success';
             } else {
                 $response['error'] = 'ERROR';
                 $status = 500;
