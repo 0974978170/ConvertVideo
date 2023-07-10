@@ -67,6 +67,8 @@ class ConvertVideoController extends Controller
         $status = 200;
         try {
             if ($Data) {
+                $zoom_input_txt = 'zoom_input.txt';
+                $zoom_input_file = fopen($zoom_input_txt, 'w');
                 $folder_output = 'output-video-zoom';
                 if (!file_exists(base_path('storage\app\public\\' . $folder_output))) {
                     mkdir(base_path('storage\app\public\\' . $folder_output), 0777, true);
@@ -76,11 +78,21 @@ class ConvertVideoController extends Controller
                     $array = explode('.',$item['videoId']);
                     $output_path = base_path('storage\app\public\\' . $folder_output . '\\' . $array[0] . '_' . $item['x-zoom'] . '_' . $item['y-zoom'] . '.mp4');
                     if (File::exists($input_path)) {
-                        $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $item['end-zoom'] . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
+                        $duration_zoom = 1000000;
+                        $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $duration_zoom . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
                         . "," . $item['scale-zoom'] . "))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
                         shell_exec($Command);
+                        fwrite($zoom_input_file, "file '$output_path'" . PHP_EOL);
                     }
                 }
+                $folder_output_concat = 'output_concat_zoom';
+                if (!file_exists(base_path('storage\app\public\\' . $folder_output_concat))) {
+                    mkdir(base_path('storage\app\public\\' . $folder_output_concat), 0777, true);
+                }
+                $output_video_path = base_path('storage\app\public\\' . $folder_output_concat . '\\' . 'output_video_zoom.mp4');
+                $Commands = $Ffmpeg . ' -f concat -safe 0 -i ' . $zoom_input_txt . ' -c:v copy -c:a copy -y ' . $output_video_path;
+                shell_exec($Commands);
+                unlink($zoom_input_txt);
                 $response['Zoom'] = 'Zoom Success';
             } else {
                 $response['error'] = 'ERROR';
