@@ -78,10 +78,16 @@ class ConvertVideoController extends Controller
                     $array = explode('.',$item['videoId']);
                     $output_path = base_path('storage\app\public\\' . $folder_output . '\\' . $array[0] . '_' . $item['x-zoom'] . '_' . $item['y-zoom'] . '.mp4');
                     if (File::exists($input_path)) {
-                        $duration_zoom = 1000000;
-                        $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $duration_zoom . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
-                        . "," . $item['scale-zoom'] . "))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
-                        shell_exec($Command);
+                        if ($item['scale-zoom-before'] || $item['scale-zoom-after']) {
+                            $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time,0,1),min(max(zoom,pzoom)+2," . $item['scale-zoom-before'] . "),if(between(in_time,1,1000000),max(max(zoom,pzoom)-" . $item['speed-zoom']
+                                . "," . $item['scale-zoom-after'] . ")))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
+                            shell_exec($Command);
+                        } else {
+                            $duration_zoom = 1000000;
+                            $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $duration_zoom . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
+                                . "," . $item['scale-zoom'] . "))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
+                            shell_exec($Command);
+                        }
                         fwrite($zoom_input_file, "file '$output_path'" . PHP_EOL);
                     }
                 }
