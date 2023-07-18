@@ -30,7 +30,7 @@ class ConvertVideoController extends Controller
                 }
                 foreach ($Data as $item) {
                     $input_path = base_path('storage\app\public\input' . '\\' . $item['videoId']);
-                    $array = explode('.',$item['videoId']);
+                    $array = explode('.', $item['videoId']);
                     $output_path = base_path('storage\app\public\\' . $folder_output . '\\' . $array[0] . '_' . $item['start'] . '_' . $item['duration'] . '.mp4');
                     if (File::exists($input_path)) {
                         $Command = $Ffmpeg . ' -i ' . $input_path . ' -ss ' . $item['start'] . ' -t ' . $item['duration'] . ' -vf "scale=1920:1080" -r 25 -c:v libx264 -preset fast -c:a aac -y ' . $output_path;
@@ -60,7 +60,8 @@ class ConvertVideoController extends Controller
         }
     }
 
-    public function zoomVideo(Request $request) {
+    public function zoomVideo(Request $request)
+    {
         set_time_limit(0);
         $Ffmpeg = $this->exe . '\ffmpeg.exe';
         $Data = $request->input();
@@ -75,15 +76,20 @@ class ConvertVideoController extends Controller
                 }
                 foreach ($Data as $item) {
                     $input_path = base_path('storage\app\public\input' . '\\' . $item['videoId']);
-                    $array = explode('.',$item['videoId']);
+                    $array = explode('.', $item['videoId']);
                     $output_path = base_path('storage\app\public\\' . $folder_output . '\\' . $array[0] . '_' . $item['x-zoom'] . '_' . $item['y-zoom'] . '.mp4');
                     if (File::exists($input_path)) {
+                        $duration_zoom = 1000000;
                         if ($item['scale-zoom-before'] || $item['scale-zoom-after']) {
-                            $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time,0,1),min(max(zoom,pzoom)+2," . $item['scale-zoom-before'] . "),if(between(in_time,1,1000000),max(max(zoom,pzoom)-" . $item['speed-zoom']
-                                . "," . $item['scale-zoom-after'] . ")))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
+                            $Command = $Ffmpeg . " -i " . $input_path . " -vf \"zoompan=z='if(between(in_time,0,1),min(max(zoom,pzoom)+10," . $item['scale-zoom-before'] . "),if(between(in_time,1," . $duration_zoom . "),max(max(zoom,pzoom)-" . $item['speed-zoom']
+                                . "," . $item['scale-zoom-after'] . ")))':d=1:x='if(lte(in_time,1)," . $item['x-zoom'] . "/2-" . $item['x-zoom'] .
+                                "/(zoom*2)," . $item['x-zoom-after'] . "/2-" . $item['x-zoom-after'] . "/(zoom*2)+(" . $item['x-zoom-after'] . "/2-" . $item['x-zoom-after'] . "/(zoom*2))*(in_time-1)/1)'" .
+                                ":y='if(lte(in_time,1)," . $item['y-zoom'] . "/2-" . $item['y-zoom'] .
+                                "/(zoom*2)," . $item['y-zoom-after'] . "/2-" . $item['y-zoom-after'] . "/(zoom*2)+(" . $item['y-zoom-after'] . "/2-" . $item['y-zoom-after'] . "/(zoom*2))*(in_time-1)/1)'"
+                                . ":s='1920x1080',rotate=" . $item['rotate'] . "*PI/180:enable='between(t,1," . $duration_zoom . ")'\"  -c:v libx264 -crf 20 -preset fast -c:a copy -y " . $output_path;
+                            dd($Command);
                             shell_exec($Command);
                         } else {
-                            $duration_zoom = 1000000;
                             $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $duration_zoom . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
                                 . "," . $item['scale-zoom'] . "))':d=1:x='" . $item['x-zoom'] . "/2-(" . $item['x-zoom'] . "/zoom/2)':y='" . $item['y-zoom'] . "/2-(" . $item['y-zoom'] . "/zoom/2)':s='1920x1080' -y " . $output_path;
                             shell_exec($Command);
