@@ -86,7 +86,9 @@ class ConvertVideoController extends Controller
                                 $item['x-zoom'] . "-iw/(zoom*2)+(" . $item['x-zoom-after'] . "-iw/(zoom*2))*(in_time-1)/1)'" .
                                 ":y='if(lte(in_time,1)," . $item['y-zoom'] . "-ih/(zoom*2)," .
                                 $item['y-zoom'] . "-ih/(zoom*2)+(" . $item['y-zoom-after'] . "-ih/(zoom*2))*(in_time-1)/1)'"
-                                . ":s='1920x1080',rotate=" . $item['rotate'] . "*PI/180:enable='between(t,1," . $duration_zoom . ")'\"  -c:v libx264 -crf 20 -preset fast -c:a copy -y " . $output_path;
+                                . ":s='1920x1080',rotate='if(between(t,0,1)," . $item['rotate-before'] . "*PI/180,if(between(t,1,2),(t-1)*(" .
+                                $item['rotate-after'] ."*PI/180-" . $item['rotate-before'] . "*PI/180)/(2-1)+" . $item['rotate-before'] . "*PI/180," . $item['rotate-after'] .
+                                "*PI/180))'\"  -c:v libx264 -crf 20 -preset fast -c:a copy -y " . $output_path;
                             shell_exec($Command);
                         } else {
                             $Command = $Ffmpeg . " -i " . $input_path . " -vf zoompan=z='if(between(in_time," . $item['start-zoom'] . "," . $duration_zoom . "),min(max(zoom,pzoom)+" . $item['speed-zoom']
