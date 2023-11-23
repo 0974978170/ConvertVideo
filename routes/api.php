@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConvertVideoController;
+use App\Http\Controllers\ShareVideoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/convert-multi-video', [ConvertVideoController::class, 'convertMultiVideo']);
 Route::post('/zoom-video', [ConvertVideoController::class, 'zoomVideo']);
+Route::post('/share-video/{file_id}', [ShareVideoController::class, 'shareWidget']);
