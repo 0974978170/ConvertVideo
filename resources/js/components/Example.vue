@@ -25,7 +25,7 @@ export default {
     },
     methods: {
         shareOnFacebook() {
-            axios.post(`/api/share-video/${123}`)
+            axios.post(`/api/share-video/${923279822752038}`)
                 .then(response => {
                     this.data = response.data;
                     console.log("Response from server:", response.data);
