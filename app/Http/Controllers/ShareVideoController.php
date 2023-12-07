@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
-
 class ShareVideoController extends Controller
 {
     public function shareWidget(int $file_id)
@@ -46,17 +45,29 @@ class ShareVideoController extends Controller
                 }
             }
             if (isset($foundData)) {
-                // In ra dữ liệu khi tìm thấy
-                dd($foundData);
+                preg_match('/<iframe.*?src=["\'](.*?)["\'].*?>/i', $foundData['embed_html'], $matches);
+                if (isset($matches[1])) {
+                    $srcValue = $matches[1];
+                    $parsedUrl = parse_url($srcValue);
+                    $queryString = urldecode($parsedUrl['query']);
+                    parse_str($queryString, $queryParams);
+                    $hrefValue = $queryParams['href'];
+                    $shareComponent = (new \Jorenvh\Share\Share)->page(
+                        $hrefValue,
+                        ''
+                    )
+                        ->facebook()
+                        ->getRawLinks();
+                    return $shareComponent;
+                }
             } else {
-                // Xử lý khi không tìm thấy
-                echo "Không tìm thấy dữ liệu với id ";
+                return '';
             }
         }, function (RequestException $exception) {
             echo "Error occured. ";
             echo "Error message: " . $exception->getMessage();
         });
-        $connection_data_video->wait();
-
+        $result = $connection_data_video->wait();
+        return $result;
     }
 }

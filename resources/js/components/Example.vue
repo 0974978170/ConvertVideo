@@ -25,10 +25,10 @@ export default {
     },
     methods: {
         shareOnFacebook() {
-            axios.post(`/api/share-video/${923279822752038}`)
+            axios.post(`/api/share-video/${807222581415749}`)
                 .then(response => {
                     this.data = response.data;
-                    console.log("Response from server:", response.data);
+                    window.location.href = response.data;
                 })
                 .catch(error => {
                     console.error("Error:", error);
